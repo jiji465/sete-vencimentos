@@ -18,12 +18,26 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Poppins', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				
+				// Brand colors
+				brand: {
+					blue: 'hsl(var(--brand-blue))',
+					'blue-light': 'hsl(var(--brand-blue-light))',
+					'blue-dark': 'hsl(var(--brand-blue-dark))',
+					gold: 'hsl(var(--brand-gold))',
+					'gold-light': 'hsl(var(--brand-gold-light))',
+					'gold-dark': 'hsl(var(--brand-gold-dark))',
+				},
+				
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'

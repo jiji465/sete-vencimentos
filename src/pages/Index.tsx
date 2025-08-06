@@ -1,13 +1,29 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useEffect, useState } from 'react';
+import { FiscalCalendarApp } from '@/components/fiscal/FiscalCalendarApp';
 
 const Index = () => {
+  const [isViewOnly, setIsViewOnly] = useState(false);
+  const [calendarId, setCalendarId] = useState<string | undefined>();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const viewId = params.get('view');
+    const editId = params.get('id');
+
+    if (viewId) {
+      setIsViewOnly(true);
+      setCalendarId(viewId);
+    } else if (editId) {
+      setIsViewOnly(false);
+      setCalendarId(editId);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <FiscalCalendarApp 
+      isViewOnly={isViewOnly} 
+      calendarId={calendarId} 
+    />
   );
 };
 

@@ -8,50 +8,68 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Fiscal Brand Colors */
+    --brand-blue: 217 55% 21%;  /* #1F2D5A */
+    --brand-blue-light: 217 55% 30%;
+    --brand-blue-dark: 217 60% 15%;
+    
+    --brand-gold: 36 74% 51%;  /* #E8A021 */
+    --brand-gold-light: 36 85% 95%;
+    --brand-gold-dark: 36 80% 40%;
+    
+    /* Core Design System */
+    --background: 210 20% 98%;
+    --foreground: 217 55% 21%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 217 55% 21%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 217 55% 21%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217 55% 21%;  /* brand-blue */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 36 85% 95%;  /* brand-gold-light */
+    --secondary-foreground: 217 55% 21%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 95%;
+    --muted-foreground: 217 25% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 36 74% 51%;  /* brand-gold */
+    --accent-foreground: 217 55% 21%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 20% 88%;
+    --input: 210 20% 95%;
+    --ring: 36 74% 51%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
+    /* Custom Gradients */
+    --gradient-brand: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-blue-light)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--brand-gold)), hsl(var(--brand-gold-dark)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(210 20% 96%));
+
+    /* Shadows */
+    --shadow-brand: 0 10px 30px -10px hsl(var(--brand-blue) / 0.2);
+    --shadow-gold: 0 4px 20px -4px hsl(var(--brand-gold) / 0.3);
+    --shadow-elegant: 0 20px 50px -12px hsl(217 55% 21% / 0.15);
+
+    /* Animation */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Sidebar tokens remain for compatibility */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -100,6 +118,72 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  /* Custom Calendar Components */
+  .calendar-grid {
+    @apply grid grid-cols-7 gap-px bg-border;
+  }
+  
+  .calendar-day {
+    @apply min-h-[120px] bg-card p-2 transition-colors hover:bg-muted/50 cursor-pointer flex flex-col;
+  }
+  
+  .calendar-day.today {
+    @apply bg-secondary/30 border-l-4 border-accent;
+  }
+  
+  .calendar-event {
+    @apply text-xs p-2 mb-1 rounded-md border-l-2 transition-all hover:shadow-sm relative group;
+  }
+  
+  .calendar-event.imposto {
+    @apply bg-secondary text-secondary-foreground border-accent;
+  }
+  
+  .calendar-event.parcelamento {
+    @apply bg-muted text-muted-foreground border-muted-foreground/30;
+  }
+  
+  .event-delete-btn {
+    @apply absolute top-1 right-1 w-4 h-4 rounded-full bg-destructive/80 text-destructive-foreground text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive;
+  }
+
+  /* Professional gradients */
+  .gradient-brand {
+    background: var(--gradient-brand);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .gradient-subtle {
+    background: var(--gradient-subtle);
+  }
+
+  /* Professional shadows */
+  .shadow-brand {
+    box-shadow: var(--shadow-brand);
+  }
+  
+  .shadow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+  
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-spring {
+    transition: var(--transition-spring);
   }
 }
