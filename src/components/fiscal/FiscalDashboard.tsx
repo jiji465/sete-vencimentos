@@ -81,7 +81,9 @@ export function FiscalDashboard({ events, currentDate, clientName }: FiscalDashb
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 6
     }).format(value);
   };
 

@@ -9,16 +9,16 @@ export const formatCurrencyForDisplay = (value: number): string => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 6
   }).format(value);
 };
 
 export const formatCurrencyForInput = (value: number): string => {
   if (isNaN(value)) return '';
   return new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 6,
     useGrouping: false
   }).format(value).replace('.', ',');
 };
@@ -41,5 +41,23 @@ export const getMonthYear = (date: Date): string => {
 };
 
 export const generateCalendarId = (): string => {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const timestamp = Date.now().toString(36);
+  const randomPart = Math.random().toString(36).substr(2, 9);
+  const shortId = Math.random().toString(36).substr(2, 5);
+  return `sete-${timestamp}-${randomPart}-${shortId}`;
+};
+
+export const createCustomShareLink = (calendarId: string, clientName?: string): string => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const safeName = clientName ? encodeURIComponent(clientName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')) : '';
+  
+  if (safeName) {
+    return `${baseUrl}/calendario/${safeName}?id=${calendarId}`;
+  }
+  return `${baseUrl}/calendario-fiscal?view=${calendarId}`;
+};
+
+export const createEditLink = (calendarId: string): string => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${baseUrl}?edit=${calendarId}`;
 };
