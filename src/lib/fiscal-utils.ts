@@ -14,16 +14,16 @@ export const formatCurrencyForDisplay = (value: number): string => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 6
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(value);
 };
 
 export const formatCurrencyForInput = (value: number): string => {
   if (isNaN(value)) return '';
   return new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 6,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
     useGrouping: false
   }).format(value).replace('.', ',');
 };
@@ -54,12 +54,8 @@ export const generateCalendarId = (): string => {
 
 export const createCustomShareLink = (calendarId: string, clientName?: string): string => {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const safeName = clientName ? encodeURIComponent(clientName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')) : '';
-  
-  if (safeName) {
-    return `${baseUrl}/calendario/${safeName}?id=${calendarId}`;
-  }
-  return `${baseUrl}/calendario-fiscal?view=${calendarId}`;
+  // Simplifica o link de compartilhamento para evitar problemas
+  return `${baseUrl}?view=${calendarId}`;
 };
 
 export const createEditLink = (calendarId: string): string => {
