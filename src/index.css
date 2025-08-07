@@ -149,7 +149,11 @@ All colors MUST be HSL.
   }
   
   .event-delete-btn {
-    @apply absolute top-1 right-1 w-4 h-4 rounded-full bg-destructive/80 text-destructive-foreground text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive;
+    @apply absolute top-1 right-1 w-4 h-4 rounded-full bg-destructive/80 text-destructive-foreground text-xs flex items-center justify-center opacity-0 transition-opacity hover:bg-destructive;
+  }
+  
+  .calendar-event:hover .event-delete-btn {
+    @apply opacity-100;
   }
 
   /* Professional gradients */

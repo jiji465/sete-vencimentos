@@ -5,6 +5,7 @@ import { CalendarControls } from './CalendarControls';
 import { Calendar } from './Calendar';
 import { EventModal } from './EventModal';
 import { ShareModal } from './ShareModal';
+import { FiscalDashboard } from './FiscalDashboard';
 import { useFiscalCalendar } from '@/hooks/use-fiscal-calendar';
 import { FiscalEvent } from '@/types/fiscal';
 
@@ -99,6 +100,12 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
             onEventEdit={handleEventEdit}
             onEventDelete={handleEventDelete}
             isViewOnly={isViewOnly}
+          />
+
+          <FiscalDashboard
+            events={state.events}
+            currentDate={currentDate}
+            clientName={state.appInfo.name}
           />
         </div>
 
