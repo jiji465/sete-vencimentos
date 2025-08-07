@@ -1,6 +1,11 @@
 export const parseCurrency = (valueStr: string): number => {
   if (typeof valueStr !== 'string' || !valueStr) return 0;
-  const cleaned = valueStr.replace(/[^\d,]/g, '').replace(',', '.');
+  // Remove todos os caracteres exceto dígitos, vírgulas e pontos
+  // Primeiro remove os pontos (separadores de milhares) e depois substitui vírgula por ponto
+  const cleaned = valueStr
+    .replace(/[^\d.,]/g, '') // Remove tudo exceto dígitos, vírgulas e pontos
+    .replace(/\./g, '') // Remove pontos (separadores de milhares)
+    .replace(',', '.'); // Substitui vírgula decimal por ponto
   return parseFloat(cleaned) || 0;
 };
 
