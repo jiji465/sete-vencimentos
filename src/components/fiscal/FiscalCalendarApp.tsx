@@ -122,7 +122,6 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
           isOpen={shareModalOpen}
           onClose={() => setShareModalOpen(false)}
           calendarId={currentCalendarId}
-          clientName={state.appInfo.name}
         />
       </div>
     </div>

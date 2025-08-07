@@ -1,11 +1,6 @@
 export const parseCurrency = (valueStr: string): number => {
   if (typeof valueStr !== 'string' || !valueStr) return 0;
-  // Remove todos os caracteres exceto dígitos, vírgulas e pontos
-  // Primeiro remove os pontos (separadores de milhares) e depois substitui vírgula por ponto
-  const cleaned = valueStr
-    .replace(/[^\d.,]/g, '') // Remove tudo exceto dígitos, vírgulas e pontos
-    .replace(/\./g, '') // Remove pontos (separadores de milhares)
-    .replace(',', '.'); // Substitui vírgula decimal por ponto
+  const cleaned = valueStr.replace(/[^\d,]/g, '').replace(',', '.');
   return parseFloat(cleaned) || 0;
 };
 
@@ -46,19 +41,5 @@ export const getMonthYear = (date: Date): string => {
 };
 
 export const generateCalendarId = (): string => {
-  const timestamp = Date.now().toString(36);
-  const randomPart = Math.random().toString(36).substr(2, 9);
-  const shortId = Math.random().toString(36).substr(2, 5);
-  return `sete-${timestamp}-${randomPart}-${shortId}`;
-};
-
-export const createCustomShareLink = (calendarId: string, clientName?: string): string => {
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  // Simplifica o link de compartilhamento para evitar problemas
-  return `${baseUrl}?view=${calendarId}`;
-};
-
-export const createEditLink = (calendarId: string): string => {
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  return `${baseUrl}?edit=${calendarId}`;
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };

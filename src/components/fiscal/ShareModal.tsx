@@ -3,52 +3,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Check, ExternalLink, Share2 } from "lucide-react";
+import { Copy, Check, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createCustomShareLink, createEditLink } from "@/lib/fiscal-utils";
 
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   calendarId: string;
-  clientName?: string;
 }
 
-export function ShareModal({ isOpen, onClose, calendarId, clientName }: ShareModalProps) {
-  const [copiedShare, setCopiedShare] = useState(false);
-  const [copiedEdit, setCopiedEdit] = useState(false);
+export function ShareModal({ isOpen, onClose, calendarId }: ShareModalProps) {
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  const shareLink = createCustomShareLink(calendarId, clientName);
-  const editLink = createEditLink(calendarId);
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareLink = `${baseUrl}?view=${calendarId}`;
 
-  const handleCopyShare = async () => {
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareLink);
-      setCopiedShare(true);
+      setCopied(true);
       toast({
-        title: "Link de partilha copiado!",
+        title: "Link copiado!",
         description: "O link foi copiado para a área de transferência.",
       });
-      setTimeout(() => setCopiedShare(false), 2000);
-    } catch (err) {
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o link.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleCopyEdit = async () => {
-    try {
-      await navigator.clipboard.writeText(editLink);
-      setCopiedEdit(true);
-      toast({
-        title: "Link de edição copiado!",
-        description: "Guarde este link para poder editar o calendário.",
-      });
-      setTimeout(() => setCopiedEdit(false), 2000);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
         title: "Erro ao copiar",
@@ -68,89 +47,51 @@ export function ShareModal({ isOpen, onClose, calendarId, clientName }: ShareMod
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <p className="text-muted-foreground">
-            Gerencie os links do seu calendário fiscal de forma segura e personalizada.
+            Envie o link abaixo para o seu cliente. Ele terá acesso apenas para visualização do calendário.
           </p>
 
-          {/* Link de Partilha para Cliente */}
-          <div className="space-y-2">
-            <Label htmlFor="share-link" className="text-sm font-medium flex items-center gap-2">
-              <Share2 className="w-4 h-4" />
-              Link de Partilha (Cliente)
+          <div>
+            <Label htmlFor="share-link" className="text-sm font-medium">
+              Link de Partilha
             </Label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-1">
               <Input
                 id="share-link"
                 value={shareLink}
                 readOnly
-                className="bg-muted cursor-pointer font-mono text-xs"
+                className="bg-muted cursor-pointer"
                 onClick={(e) => e.currentTarget.select()}
               />
               <Button
-                onClick={handleCopyShare}
+                onClick={handleCopy}
                 variant="outline"
                 size="icon"
                 className="transition-spring"
               >
-                {copiedShare ? (
+                {copied ? (
                   <Check className="w-4 h-4 text-green-600" />
                 ) : (
                   <Copy className="w-4 h-4" />
                 )}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Link personalizado para o cliente visualizar o calendário
-            </p>
-          </div>
-
-          {/* Link de Edição para o Criador */}
-          <div className="space-y-2">
-            <Label htmlFor="edit-link" className="text-sm font-medium flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              Link de Edição (Seu)
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="edit-link"
-                value={editLink}
-                readOnly
-                className="bg-muted cursor-pointer font-mono text-xs"
-                onClick={(e) => e.currentTarget.select()}
-              />
-              <Button
-                onClick={handleCopyEdit}
-                variant="outline"
-                size="icon"
-                className="transition-spring"
-              >
-                {copiedEdit ? (
-                  <Check className="w-4 h-4 text-green-600" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              ⚠️ Guarde este link para poder editar o calendário no futuro
-            </p>
           </div>
 
           <div className="bg-secondary/30 p-4 rounded-lg border border-accent/20">
             <h4 className="font-semibold text-sm mb-2 text-accent-foreground">
-              Instruções importantes:
+              Instruções para o cliente:
             </h4>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• <strong>Link de Partilha:</strong> Apenas visualização, seguro para clientes</li>
-              <li>• <strong>Link de Edição:</strong> Permite modificar dados, mantenha privado</li>
-              <li>• Links personalizados nunca expiram</li>
-              <li>• Funcionam em qualquer dispositivo e navegador</li>
+              <li>• Clique no link para ver o calendário fiscal</li>
+              <li>• O calendário abrirá em modo apenas leitura</li>
+              <li>• Não é possível editar os dados através deste link</li>
             </ul>
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button onClick={onClose} variant="outline" className="transition-spring">
+          <div className="flex justify-end">
+            <Button onClick={onClose} variant="brand" className="transition-spring">
               Fechar
             </Button>
           </div>
