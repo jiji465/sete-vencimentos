@@ -14,7 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      fiscal_calendars: {
+        Row: {
+          calendar_title: string
+          client_cnpj: string | null
+          client_name: string | null
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          calendar_title?: string
+          client_cnpj?: string | null
+          client_name?: string | null
+          created_at?: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          calendar_title?: string
+          client_cnpj?: string | null
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fiscal_events: {
+        Row: {
+          calendar_id: string
+          created_at: string
+          date: string
+          id: string
+          tax_name: string
+          title: string | null
+          type: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          calendar_id: string
+          created_at?: string
+          date: string
+          id: string
+          tax_name: string
+          title?: string | null
+          type: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          calendar_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          tax_name?: string
+          title?: string | null
+          type?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_events_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "fiscal_calendars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
