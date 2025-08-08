@@ -1,42 +1,12 @@
 export const parseCurrency = (valueStr: string): number => {
   if (typeof valueStr !== 'string' || !valueStr) return 0;
-  const raw = valueStr.trim();
-
-  // If uses comma as decimal (pt-BR typical)
-  if (raw.includes(',')) {
-    // Keep digits and commas only
-    const only = raw.replace(/[^\d,]/g, '');
-    // Use the last comma as decimal separator, remove the others (thousand separators)
-    const parts = only.split(',');
-    const intPart = parts.slice(0, -1).join('');
-    const decPart = parts.slice(-1)[0] || '';
-    const normalized = `${intPart}.${decPart}`;
-    return parseFloat(normalized) || 0;
-  }
-
-  // If uses dot(s)
-  if (raw.includes('.')) {
-    let only = raw.replace(/[^\d.]/g, '');
-    const dotCount = (only.match(/\./g) || []).length;
-
-    if (dotCount > 1) {
-      // Treat all dots as thousand separators
-      const normalized = only.replace(/\./g, '');
-      return parseFloat(normalized) || 0;
-    }
-
-    // Single dot: decide if decimal or thousand separator
-    const [i, d] = only.split('.');
-    if (d && d.length <= 2) {
-      return parseFloat(`${i}.${d}`) || 0;
-    }
-    // Likely thousand separator (e.g., 100.000)
-    return parseFloat(only.replace(/\./g, '')) || 0;
-  }
-
-  // No separators: digits only
-  const digits = raw.replace(/\D/g, '');
-  return parseFloat(digits) || 0;
+  // Remove todos os caracteres exceto dígitos, vírgulas e pontos
+  // Primeiro remove os pontos (separadores de milhares) e depois substitui vírgula por ponto
+  const cleaned = valueStr
+    .replace(/[^\d.,]/g, '') // Remove tudo exceto dígitos, vírgulas e pontos
+    .replace(/\./g, '') // Remove pontos (separadores de milhares)
+    .replace(',', '.'); // Substitui vírgula decimal por ponto
+  return parseFloat(cleaned) || 0;
 };
 
 export const formatCurrencyForDisplay = (value: number): string => {
@@ -76,5 +46,19 @@ export const getMonthYear = (date: Date): string => {
 };
 
 export const generateCalendarId = (): string => {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const timestamp = Date.now().toString(36);
+  const randomPart = Math.random().toString(36).substr(2, 9);
+  const shortId = Math.random().toString(36).substr(2, 5);
+  return `sete-${timestamp}-${randomPart}-${shortId}`;
+};
+
+export const createCustomShareLink = (calendarId: string, clientName?: string): string => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  // Simplifica o link de compartilhamento para evitar problemas
+  return `${baseUrl}?view=${calendarId}`;
+};
+
+export const createEditLink = (calendarId: string): string => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${baseUrl}?edit=${calendarId}`;
 };
