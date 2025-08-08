@@ -118,11 +118,12 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
           defaultDate={selectedDate}
         />
 
-        <ShareModal
-          isOpen={shareModalOpen}
-          onClose={() => setShareModalOpen(false)}
-          calendarId={currentCalendarId}
-        />
+<ShareModal
+  isOpen={shareModalOpen}
+  onClose={() => setShareModalOpen(false)}
+  calendarId={currentCalendarId}
+  slugBase={`${state.appInfo.calendarTitle} ${state.appInfo.name}`}
+/>
       </div>
     </div>
   );

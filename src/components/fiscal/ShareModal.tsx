@@ -10,15 +10,26 @@ interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   calendarId: string;
+  slugBase?: string;
 }
 
-export function ShareModal({ isOpen, onClose, calendarId }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, calendarId, slugBase }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const shareLink = `${baseUrl}?view=${calendarId}`;
-
+  const basePath = '/calendario-fiscal';
+  const slugify = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 60);
+  const slugSource = slugBase && slugBase.trim() ? slugBase : 'calendario-fiscal';
+  const slug = slugify(slugSource);
+  const shareLink = `${baseUrl}${basePath}?view=${calendarId}&s=${encodeURIComponent(slug)}`;
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareLink);
