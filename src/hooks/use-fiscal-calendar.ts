@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FiscalEvent, CalendarState } from '@/types/fiscal';
-import { generateCalendarId } from '@/lib/fiscal-utils';
+import { generateCalendarId, parseLocalDate } from '@/lib/fiscal-utils';
 
 interface UseFiscalCalendarProps {
   isViewOnly?: boolean;
@@ -44,7 +44,10 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
   }, [calendarId, state, isViewOnly]);
 
   useEffect(() => {
-    saveData();
+    const t = setTimeout(() => {
+      saveData();
+    }, 250);
+    return () => clearTimeout(t);
   }, [saveData]);
 
   // Calendar navigation
@@ -107,8 +110,10 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
     const month = currentDate.getMonth();
     
     return state.events.filter(event => {
-      const eventDate = new Date(event.date);
-      return eventDate.getFullYear() === year && eventDate.getMonth() === month;
+      const eventDate = parseLocalDate(event.date);
+      return (
+        eventDate.getFullYear() === year && eventDate.getMonth() === month
+      );
     });
   }, [currentDate, state.events]);
 

@@ -33,12 +33,25 @@ export const formatDateForDisplay = (dateStr: string): string => {
   return date.toLocaleDateString('pt-BR');
 };
 
+export const parseLocalDate = (dateStr: string): Date => {
+  if (!dateStr) return new Date(NaN);
+  const parts = dateStr.split('-').map(Number);
+  if (parts.length === 3) {
+    const [y, m, d] = parts;
+    return new Date(y, (m || 1) - 1, d || 1);
+  }
+  // Fallback para outros formatos
+  return new Date(dateStr);
+};
+
 export const isToday = (dateStr: string): boolean => {
-  const date = new Date(dateStr);
+  const date = parseLocalDate(dateStr);
   const today = new Date();
-  return date.getDate() === today.getDate() &&
-         date.getMonth() === today.getMonth() &&
-         date.getFullYear() === today.getFullYear();
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  );
 };
 
 export const getMonthYear = (date: Date): string => {
@@ -60,5 +73,5 @@ export const createCustomShareLink = (calendarId: string, clientName?: string): 
 
 export const createEditLink = (calendarId: string): string => {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  return `${baseUrl}?edit=${calendarId}`;
+  return `${baseUrl}?id=${calendarId}`;
 };
