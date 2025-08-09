@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { FiscalEvent, CalendarState } from '@/types/fiscal';
 import { generateCalendarId, parseLocalDate } from '@/lib/fiscal-utils';
+import { useFiscalStorage } from './use-fiscal-storage';
 
 interface UseFiscalCalendarProps {
   isViewOnly?: boolean;
@@ -9,46 +10,12 @@ interface UseFiscalCalendarProps {
 
 export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: UseFiscalCalendarProps = {}) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [calendarId, setCalendarId] = useState<string>(initialCalendarId || generateCalendarId());
-  const [state, setState] = useState<CalendarState>({
-    appInfo: {
-      name: '',
-      cnpj: '',
-      calendarTitle: 'Calendário de Impostos'
-    },
-    events: []
+  const calendarId = initialCalendarId || generateCalendarId();
+  
+  const { state, setState, loading, saving, saveData } = useFiscalStorage({
+    calendarId,
+    isViewOnly
   });
-
-  // Load initial data (in a real app, this would load from an API/database)
-  useEffect(() => {
-    if (initialCalendarId) {
-      // In a real implementation, load data from storage/API
-      // For demo purposes, we'll use localStorage
-      const stored = localStorage.getItem(`fiscal-calendar-${initialCalendarId}`);
-      if (stored) {
-        try {
-          const data = JSON.parse(stored);
-          setState(data);
-        } catch (error) {
-          console.error('Error loading calendar data:', error);
-        }
-      }
-    }
-  }, [initialCalendarId]);
-
-  // Save data (debounced in real implementation)
-  const saveData = useCallback(() => {
-    if (!isViewOnly) {
-      localStorage.setItem(`fiscal-calendar-${calendarId}`, JSON.stringify(state));
-    }
-  }, [calendarId, state, isViewOnly]);
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      saveData();
-    }, 250);
-    return () => clearTimeout(t);
-  }, [saveData]);
 
   // Calendar navigation
   const navigateMonth = useCallback((direction: 'prev' | 'next') => {
@@ -65,27 +32,33 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
 
   // Event management
   const addEvent = useCallback((event: FiscalEvent) => {
-    setState(prev => ({
-      ...prev,
-      events: [...prev.events, event]
-    }));
-  }, []);
+    const newState = {
+      ...state,
+      events: [...state.events, event]
+    };
+    setState(newState);
+    saveData(newState);
+  }, [state, setState, saveData]);
 
   const updateEvent = useCallback((updatedEvent: FiscalEvent) => {
-    setState(prev => ({
-      ...prev,
-      events: prev.events.map(event => 
+    const newState = {
+      ...state,
+      events: state.events.map(event => 
         event.id === updatedEvent.id ? updatedEvent : event
       )
-    }));
-  }, []);
+    };
+    setState(newState);
+    saveData(newState);
+  }, [state, setState, saveData]);
 
   const deleteEvent = useCallback((eventId: string) => {
-    setState(prev => ({
-      ...prev,
-      events: prev.events.filter(event => event.id !== eventId)
-    }));
-  }, []);
+    const newState = {
+      ...state,
+      events: state.events.filter(event => event.id !== eventId)
+    };
+    setState(newState);
+    saveData(newState);
+  }, [state, setState, saveData]);
 
   const saveEvent = useCallback((event: FiscalEvent) => {
     const existingEvent = state.events.find(e => e.id === event.id);
@@ -98,11 +71,13 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
 
   // App info management
   const updateAppInfo = useCallback((updates: Partial<CalendarState['appInfo']>) => {
-    setState(prev => ({
-      ...prev,
-      appInfo: { ...prev.appInfo, ...updates }
-    }));
-  }, []);
+    const newState = {
+      ...state,
+      appInfo: { ...state.appInfo, ...updates }
+    };
+    setState(newState);
+    saveData(newState);
+  }, [state, setState, saveData]);
 
   // Get events for current month
   const getCurrentMonthEvents = useCallback(() => {
@@ -123,6 +98,8 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
     calendarId,
     state,
     isViewOnly,
+    loading,
+    saving,
     
     // Navigation
     navigateMonth,

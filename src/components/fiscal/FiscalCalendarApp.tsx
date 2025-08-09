@@ -19,6 +19,8 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     currentDate,
     calendarId: currentCalendarId,
     state,
+    loading,
+    saving,
     navigateMonth,
     saveEvent,
     deleteEvent,
@@ -66,9 +68,27 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     setShareModalOpen(true);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen gradient-subtle flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando calendário...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen gradient-subtle">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
+        {saving && (
+          <div className="fixed top-4 right-4 z-50 bg-primary/10 border border-primary/20 rounded-lg p-3 flex items-center gap-2">
+            <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
+            <span className="text-sm text-primary">Sincronizando...</span>
+          </div>
+        )}
+
         <FiscalHeader
           calendarTitle={state.appInfo.calendarTitle}
           onCalendarTitleChange={(title) => updateAppInfo({ calendarTitle: title })}

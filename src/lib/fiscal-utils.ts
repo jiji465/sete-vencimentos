@@ -67,8 +67,13 @@ export const generateCalendarId = (): string => {
 
 export const createCustomShareLink = (calendarId: string, clientName?: string): string => {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  // Simplifica o link de compartilhamento para evitar problemas
-  return `${baseUrl}?view=${calendarId}`;
+  const slug = clientName 
+    ? clientName.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 30)
+    : 'calendario';
+  return `${baseUrl}?view=${calendarId}&s=${slug}`;
 };
 
 export const createEditLink = (calendarId: string): string => {
