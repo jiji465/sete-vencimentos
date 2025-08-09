@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogDescription } from "@radix-ui/react-dialog";
 import { Copy, Check, ExternalLink, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { createCustomShareLink, createEditLink } from "@/lib/fiscal-utils";
@@ -66,6 +67,7 @@ export function ShareModal({ isOpen, onClose, calendarId, clientName }: ShareMod
             <ExternalLink className="w-5 h-5" />
             Partilhar Calendário
           </DialogTitle>
+          <DialogDescription className="sr-only">Gerencie e copie os links de partilha e edição do calendário.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

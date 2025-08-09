@@ -31,7 +31,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
         .from('fiscal_calendars')
         .select('*')
         .eq('id', calendarId)
-        .single();
+        .maybeSingle();
 
       // Get events
       const { data: events } = await supabase
@@ -55,6 +55,16 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
             value: parseFloat(event.value?.toString() || '0'),
             type: event.type as 'imposto' | 'parcelamento'
           }))
+        });
+      }
+
+      // If calendar doesn't exist yet, provision it (only when editable)
+      if (!calendar && !isViewOnly) {
+        await supabase.from('fiscal_calendars').upsert({
+          id: calendarId,
+          calendar_title: 'Calendário de Impostos',
+          client_name: '',
+          client_cnpj: ''
         });
       }
     } catch (error) {

@@ -10,7 +10,7 @@ interface UseFiscalCalendarProps {
 
 export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: UseFiscalCalendarProps = {}) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const calendarId = initialCalendarId || generateCalendarId();
+  const [calendarId] = useState(initialCalendarId || generateCalendarId());
   
   const { state, setState, loading, saving, saveData } = useFiscalStorage({
     calendarId,
@@ -92,6 +92,10 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
     });
   }, [currentDate, state.events]);
 
+  const persistNow = useCallback(() => {
+    saveData(state);
+  }, [saveData, state]);
+
   return {
     // State
     currentDate,
@@ -100,16 +104,19 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
     isViewOnly,
     loading,
     saving,
-    
+
     // Navigation
     navigateMonth,
-    
+
     // Event management
     saveEvent,
     deleteEvent,
     getCurrentMonthEvents,
-    
+
     // App info
-    updateAppInfo
+    updateAppInfo,
+
+    // Persist
+    persistNow
   };
 }

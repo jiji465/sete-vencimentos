@@ -24,7 +24,8 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     navigateMonth,
     saveEvent,
     deleteEvent,
-    updateAppInfo
+    updateAppInfo,
+    persistNow
   } = useFiscalCalendar({ isViewOnly, initialCalendarId: calendarId });
 
   const [eventModalOpen, setEventModalOpen] = useState(false);
@@ -59,12 +60,17 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     setEventModalOpen(true);
   };
 
-  const handleExportPdf = () => {
-    // TODO: Implement PDF export
-    console.log('Export PDF functionality to be implemented');
+  const handleExportPdf = async () => {
+    const el = document.querySelector('#calendar-root') as HTMLElement | null;
+    if (el) {
+      const { exportElementToPdf } = await import('@/lib/pdf');
+      await exportElementToPdf(el);
+    }
   };
 
   const handleShare = () => {
+    // Persist current state before sharing to ensure link loads latest data
+    persistNow?.();
     setShareModalOpen(true);
   };
 
@@ -81,7 +87,7 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
 
   return (
     <div className="min-h-screen gradient-subtle">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
+      <div id="calendar-root" className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
         {saving && (
           <div className="fixed top-4 right-4 z-50 bg-primary/10 border border-primary/20 rounded-lg p-3 flex items-center gap-2">
             <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"></div>
