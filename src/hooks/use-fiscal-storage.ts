@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { FiscalEvent, CalendarState } from '@/types/fiscal';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     events: []
   });
   const { toast } = useToast();
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Load calendar data from database
   const loadData = useCallback(async () => {
@@ -82,7 +83,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     } finally {
       setLoading(false);
     }
-  }, [calendarId]);
+  }, [calendarId, isViewOnly]);
 
   // Save calendar data to database and localStorage
   const saveData = useCallback(async (newState: CalendarState) => {
@@ -91,8 +92,8 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     try {
       setSaving(true);
 
-      // Save calendar info
-      await supabase
+      // Save calendar info with better error handling
+      const { error: calendarError } = await supabase
         .from('fiscal_calendars')
         .upsert({
           id: calendarId,
@@ -101,30 +102,57 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
           client_cnpj: newState.appInfo.cnpj
         });
 
-      // Delete existing events and insert new ones
-      await supabase
+      if (calendarError) {
+        throw new Error(`Erro ao salvar calendário: ${calendarError.message}`);
+      }
+
+      // Get current events from database to compare
+      const { data: currentEvents } = await supabase
         .from('fiscal_events')
-        .delete()
+        .select('id')
         .eq('calendar_id', calendarId);
 
-      if (newState.events.length > 0) {
-        await supabase
+      const currentEventIds = new Set((currentEvents || []).map(e => e.id));
+      const newEventIds = new Set(newState.events.map(e => e.id));
+
+      // Delete events that are no longer in the new state
+      const eventsToDelete = Array.from(currentEventIds).filter(id => !newEventIds.has(id));
+      if (eventsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
           .from('fiscal_events')
-          .insert(
+          .delete()
+          .in('id', eventsToDelete);
+
+        if (deleteError) {
+          console.error('Error deleting events:', deleteError);
+        }
+      }
+
+      // Upsert all events (insert new, update existing)
+      if (newState.events.length > 0) {
+        const { error: eventsError } = await supabase
+          .from('fiscal_events')
+          .upsert(
             newState.events.map(event => ({
               id: event.id,
               calendar_id: calendarId,
               tax_name: event.taxName,
-              title: event.title,
+              title: event.title || '',
               date: event.date,
               value: event.value,
               type: event.type
             }))
           );
+
+        if (eventsError) {
+          throw new Error(`Erro ao salvar eventos: ${eventsError.message}`);
+        }
       }
 
       // Backup to localStorage
       localStorage.setItem(`fiscal-calendar-${calendarId}`, JSON.stringify(newState));
+      
+      console.log('Calendar data saved successfully to Supabase');
       
     } catch (error) {
       console.error('Error saving calendar data:', error);
@@ -132,8 +160,8 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
       localStorage.setItem(`fiscal-calendar-${calendarId}`, JSON.stringify(newState));
       
       toast({
-        title: "Aviso",
-        description: "Dados salvos localmente. Conecte-se à internet para sincronização.",
+        title: "Erro de Sincronização",
+        description: error instanceof Error ? error.message : "Dados salvos localmente. Verifique sua conexão.",
         variant: "destructive"
       });
     } finally {
@@ -163,12 +191,46 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     };
   }, [calendarId, loadData]);
 
+  // Debounced save function for frequent updates
+  const saveDataDebounced = useCallback((newState: CalendarState) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Save immediately to localStorage for better UX
+    localStorage.setItem(`fiscal-calendar-${calendarId}`, JSON.stringify(newState));
+    
+    // Debounce the Supabase save
+    saveTimeoutRef.current = setTimeout(() => {
+      saveData(newState);
+    }, 1000); // 1 second debounce
+  }, [calendarId, saveData]);
+
+  // Immediate save function for important operations
+  const saveDataImmediate = useCallback(async (newState: CalendarState) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    await saveData(newState);
+  }, [saveData]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return {
     state,
     setState,
     loading,
     saving,
     saveData,
+    saveDataDebounced,
+    saveDataImmediate,
     loadData
   };
 }

@@ -68,9 +68,11 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     // Persist current state before sharing to ensure link loads latest data
-    persistNow?.();
+    if (persistNow) {
+      await persistNow();
+    }
     setShareModalOpen(true);
   };
 

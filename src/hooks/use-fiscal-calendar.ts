@@ -12,7 +12,7 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarId] = useState(initialCalendarId || generateCalendarId());
   
-  const { state, setState, loading, saving, saveData } = useFiscalStorage({
+  const { state, setState, loading, saving, saveData, saveDataDebounced, saveDataImmediate } = useFiscalStorage({
     calendarId,
     isViewOnly
   });
@@ -37,8 +37,8 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
       events: [...state.events, event]
     };
     setState(newState);
-    saveData(newState);
-  }, [state, setState, saveData]);
+    saveDataImmediate(newState); // Immediate save for new events
+  }, [state, setState, saveDataImmediate]);
 
   const updateEvent = useCallback((updatedEvent: FiscalEvent) => {
     const newState = {
@@ -48,8 +48,8 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
       )
     };
     setState(newState);
-    saveData(newState);
-  }, [state, setState, saveData]);
+    saveDataImmediate(newState); // Immediate save for event updates
+  }, [state, setState, saveDataImmediate]);
 
   const deleteEvent = useCallback((eventId: string) => {
     const newState = {
@@ -57,8 +57,8 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
       events: state.events.filter(event => event.id !== eventId)
     };
     setState(newState);
-    saveData(newState);
-  }, [state, setState, saveData]);
+    saveDataImmediate(newState); // Immediate save for deletions
+  }, [state, setState, saveDataImmediate]);
 
   const saveEvent = useCallback((event: FiscalEvent) => {
     const existingEvent = state.events.find(e => e.id === event.id);
@@ -76,8 +76,8 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
       appInfo: { ...state.appInfo, ...updates }
     };
     setState(newState);
-    saveData(newState);
-  }, [state, setState, saveData]);
+    saveDataDebounced(newState); // Debounced save for frequent text changes
+  }, [state, setState, saveDataDebounced]);
 
   // Get events for current month
   const getCurrentMonthEvents = useCallback(() => {
@@ -92,9 +92,9 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
     });
   }, [currentDate, state.events]);
 
-  const persistNow = useCallback(() => {
-    saveData(state);
-  }, [saveData, state]);
+  const persistNow = useCallback(async () => {
+    await saveDataImmediate(state);
+  }, [saveDataImmediate, state]);
 
   return {
     // State
