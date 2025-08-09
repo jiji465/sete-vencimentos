@@ -146,6 +146,23 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     loadData();
   }, [loadData]);
 
+  // Realtime syncing between devices
+  useEffect(() => {
+    const channel = supabase
+      .channel(`calendar-${calendarId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fiscal_calendars', filter: `id=eq.${calendarId}` }, () => {
+        loadData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fiscal_events', filter: `calendar_id=eq.${calendarId}` }, () => {
+        loadData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [calendarId, loadData]);
+
   return {
     state,
     setState,

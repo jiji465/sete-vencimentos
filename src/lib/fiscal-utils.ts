@@ -73,10 +73,10 @@ export const createCustomShareLink = (calendarId: string, clientName?: string): 
         .replace(/\s+/g, '-')
         .substring(0, 30)
     : 'calendario';
-  return `${baseUrl}?view=${calendarId}&s=${slug}`;
+  return `${baseUrl}/calendario-fiscal?view=${calendarId}&s=${slug}`;
 };
 
 export const createEditLink = (calendarId: string): string => {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  return `${baseUrl}?id=${calendarId}`;
+  return `${baseUrl}/calendario-fiscal?id=${calendarId}`;
 };
