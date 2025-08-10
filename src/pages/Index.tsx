@@ -1,17 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FiscalCalendarApp } from '@/components/fiscal/FiscalCalendarApp';
 
 const Index = () => {
-  const [isViewOnly, setIsViewOnly] = useState<boolean>(() => {
-    const params = new URLSearchParams(window.location.search);
-    return !!params.get('view');
-  });
-  const [calendarId, setCalendarId] = useState<string | undefined>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const viewId = params.get('view');
-    const editId = params.get('id');
-    return viewId || editId || undefined;
-  });
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const isViewOnly = !!params.get('view');
+  const calendarId = params.get('view') || params.get('id') || undefined;
 
   return (
     <FiscalCalendarApp 

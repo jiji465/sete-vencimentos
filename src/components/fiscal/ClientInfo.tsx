@@ -7,6 +7,7 @@ interface ClientInfoProps {
   clientCnpj: string;
   onClientNameChange: (name: string) => void;
   onClientCnpjChange: (cnpj: string) => void;
+  onFieldBlur?: () => void;
   isViewOnly?: boolean;
 }
 
@@ -15,6 +16,7 @@ export function ClientInfo({
   clientCnpj,
   onClientNameChange,
   onClientCnpjChange,
+  onFieldBlur,
   isViewOnly = false
 }: ClientInfoProps) {
   return (
@@ -29,6 +31,7 @@ export function ClientInfo({
               id="client-name"
               value={clientName}
               onChange={(e) => onClientNameChange(e.target.value)}
+              onBlur={() => !isViewOnly && onFieldBlur?.()}
               placeholder="Digite o nome do cliente"
               disabled={isViewOnly}
               className="transition-smooth"
@@ -43,6 +46,7 @@ export function ClientInfo({
               id="client-cnpj"
               value={clientCnpj}
               onChange={(e) => onClientCnpjChange(e.target.value)}
+              onBlur={() => !isViewOnly && onFieldBlur?.()}
               placeholder="00.000.000/0001-00"
               disabled={isViewOnly}
               className="transition-smooth"

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiscalHeader } from './FiscalHeader';
 import { ClientInfo } from './ClientInfo';
 import { CalendarControls } from './CalendarControls';
@@ -8,6 +8,9 @@ import { ShareModal } from './ShareModal';
 import { FiscalDashboard } from './FiscalDashboard';
 import { useFiscalCalendar } from '@/hooks/use-fiscal-calendar';
 import { FiscalEvent } from '@/types/fiscal';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { generateCalendarId } from '@/lib/fiscal-utils';
 
 interface FiscalCalendarAppProps {
   isViewOnly?: boolean;
@@ -21,12 +24,15 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     state,
     loading,
     saving,
+    lastSavedAt,
     navigateMonth,
     saveEvent,
     deleteEvent,
     updateAppInfo,
     persistNow
   } = useFiscalCalendar({ isViewOnly, initialCalendarId: calendarId });
+
+  const navigate = useNavigate();
 
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -76,6 +82,51 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     setShareModalOpen(true);
   };
 
+  const handleNewCalendar = async () => {
+    if (persistNow) await persistNow();
+    const newId = generateCalendarId();
+    navigate(`/calendario-fiscal?id=${newId}`);
+  };
+
+  const handleDuplicateCalendar = async () => {
+    if (persistNow) await persistNow();
+    const newId = generateCalendarId();
+
+    await supabase.from('fiscal_calendars').upsert({
+      id: newId,
+      calendar_title: state.appInfo.calendarTitle,
+      client_name: state.appInfo.name,
+      client_cnpj: state.appInfo.cnpj
+    });
+
+    if (state.events.length > 0) {
+      await supabase.from('fiscal_events').upsert(
+        state.events.map(e => ({
+          id: generateCalendarId(),
+          calendar_id: newId,
+          tax_name: e.taxName,
+          title: e.title || '',
+          date: e.date,
+          value: e.value,
+          type: e.type
+        }))
+      );
+    }
+
+    navigate(`/calendario-fiscal?id=${newId}`);
+  };
+
+  const handleOpenClients = () => {
+    navigate('/clientes');
+  };
+
+  useEffect(() => {
+    const handler = () => {
+      if (persistNow) persistNow();
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [persistNow]);
   if (loading) {
     return (
       <div className="min-h-screen gradient-subtle flex items-center justify-center">
@@ -96,6 +147,11 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
             <span className="text-sm text-primary">Sincronizando...</span>
           </div>
         )}
+        {!saving && lastSavedAt && (
+          <div className="fixed top-4 right-4 z-40 bg-muted/60 backdrop-blur border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground">
+            Sincronizado às {new Date(lastSavedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        )}
 
         <FiscalHeader
           calendarTitle={state.appInfo.calendarTitle}
@@ -103,6 +159,10 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
           onAddEvent={handleAddEvent}
           onExportPdf={handleExportPdf}
           onShare={handleShare}
+          onNewCalendar={handleNewCalendar}
+          onDuplicateCalendar={handleDuplicateCalendar}
+          onOpenClients={handleOpenClients}
+          onTitleBlur={() => persistNow?.()}
           isViewOnly={isViewOnly}
         />
 
@@ -112,6 +172,7 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
             clientCnpj={state.appInfo.cnpj}
             onClientNameChange={(name) => updateAppInfo({ name })}
             onClientCnpjChange={(cnpj) => updateAppInfo({ cnpj })}
+            onFieldBlur={() => persistNow?.()}
             isViewOnly={isViewOnly}
           />
 

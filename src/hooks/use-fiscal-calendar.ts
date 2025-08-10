@@ -20,7 +20,7 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
     }
   });
   
-  const { state, setState, loading, saving, saveData, saveDataDebounced, saveDataImmediate } = useFiscalStorage({
+  const { state, setState, loading, saving, saveData, saveDataDebounced, saveDataImmediate, lastSavedAt } = useFiscalStorage({
     calendarId,
     isViewOnly
   });
@@ -140,6 +140,9 @@ export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: Use
     updateAppInfo,
 
     // Persist
-    persistNow
+    persistNow,
+
+    // Meta
+    lastSavedAt
   };
 }

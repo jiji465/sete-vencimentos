@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Share2, Download, Plus, FileText } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface FiscalHeaderProps {
   calendarTitle: string;
@@ -9,6 +10,10 @@ interface FiscalHeaderProps {
   onAddEvent: () => void;
   onExportPdf: () => void;
   onShare: () => void;
+  onNewCalendar?: () => void;
+  onDuplicateCalendar?: () => void;
+  onOpenClients?: () => void;
+  onTitleBlur?: () => void;
   isViewOnly?: boolean;
 }
 
@@ -18,6 +23,10 @@ export function FiscalHeader({
   onAddEvent,
   onExportPdf,
   onShare,
+  onNewCalendar,
+  onDuplicateCalendar,
+  onOpenClients,
+  onTitleBlur,
   isViewOnly = false
 }: FiscalHeaderProps) {
   return (
@@ -34,6 +43,7 @@ export function FiscalHeader({
             id="calendar-title"
             value={calendarTitle}
             onChange={(e) => onCalendarTitleChange(e.target.value)}
+            onBlur={() => !isViewOnly && onTitleBlur?.()}
             placeholder="Calendário de Impostos"
             disabled={isViewOnly}
             className="text-lg font-medium text-accent bg-transparent border-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -43,6 +53,16 @@ export function FiscalHeader({
 
       {!isViewOnly && (
         <div className="flex items-center gap-3 flex-shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="shadow-sm transition-spring">Ações</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onNewCalendar}>Novo calendário</DropdownMenuItem>
+              <DropdownMenuItem onClick={onDuplicateCalendar}>Duplicar</DropdownMenuItem>
+              <DropdownMenuItem onClick={onOpenClients}>Clientes</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             onClick={onShare}
             variant="outline"

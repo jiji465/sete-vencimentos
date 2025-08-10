@@ -11,6 +11,7 @@ interface UseFiscalStorageProps {
 export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalStorageProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [state, setState] = useState<CalendarState>({
     appInfo: {
       name: '',
@@ -57,6 +58,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
             type: event.type as 'imposto' | 'parcelamento'
           }))
         });
+        setLastSavedAt(calendar?.updated_at ? new Date(calendar.updated_at) : null);
       }
 
       // If calendar doesn't exist yet, provision it (only when editable)
@@ -152,6 +154,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
       // Backup to localStorage
       localStorage.setItem(`fiscal-calendar-${calendarId}`, JSON.stringify(newState));
       
+      setLastSavedAt(new Date());
       console.log('Calendar data saved successfully to Supabase');
       
     } catch (error) {
@@ -228,6 +231,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     setState,
     loading,
     saving,
+    lastSavedAt,
     saveData,
     saveDataDebounced,
     saveDataImmediate,
