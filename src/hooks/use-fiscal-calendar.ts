@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FiscalEvent, CalendarState } from '@/types/fiscal';
 import { generateCalendarId, parseLocalDate } from '@/lib/fiscal-utils';
 import { useFiscalStorage } from './use-fiscal-storage';
@@ -10,12 +10,35 @@ interface UseFiscalCalendarProps {
 
 export function useFiscalCalendar({ isViewOnly = false, initialCalendarId }: UseFiscalCalendarProps = {}) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [calendarId] = useState(initialCalendarId || generateCalendarId());
+  const [calendarId, setCalendarId] = useState<string>(() => {
+    if (initialCalendarId) return initialCalendarId;
+    try {
+      const stored = localStorage.getItem('fiscal-last-edit-id');
+      return stored || generateCalendarId();
+    } catch {
+      return generateCalendarId();
+    }
+  });
   
   const { state, setState, loading, saving, saveData, saveDataDebounced, saveDataImmediate } = useFiscalStorage({
     calendarId,
     isViewOnly
   });
+
+  // If a calendarId comes from URL later, switch to it
+  useEffect(() => {
+    if (initialCalendarId && initialCalendarId !== calendarId) {
+      setCalendarId(initialCalendarId);
+    }
+  }, [initialCalendarId]);
+
+  // Persist last edit calendar id for future visits
+  useEffect(() => {
+    if (!isViewOnly && calendarId) {
+      localStorage.setItem('fiscal-last-edit-id', calendarId);
+    }
+  }, [calendarId, isViewOnly]);
+
 
   // Calendar navigation
   const navigateMonth = useCallback((direction: 'prev' | 'next') => {
