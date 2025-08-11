@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
+import HCaptcha from "react-hcaptcha";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ALLOW_SIGNUP, EMAIL_DOMAIN_ALLOWLIST, HCAPTCHA_SITE_KEY, RATE_LIMIT_MAX_ATTEMPTS, RATE_LIMIT_WINDOW_MS } from "@/config/security";

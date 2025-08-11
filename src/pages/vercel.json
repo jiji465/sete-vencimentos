@@ -1,9 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/índice.html" 
-      // IMPORTANTE: Usando "índice.html" que é o nome do seu arquivo principal.
-    }
-  ]
-}
