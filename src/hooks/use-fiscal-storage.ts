@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { FiscalEvent, CalendarState } from '@/types/fiscal';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
 interface UseFiscalStorageProps {
   calendarId: string;
@@ -22,6 +23,9 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
   });
   const { toast } = useToast();
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const { user } = useAuth();
+  const [ownerId, setOwnerId] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   // Load calendar data from database
   const loadData = useCallback(async () => {
@@ -59,16 +63,24 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
           }))
         });
         setLastSavedAt(calendar?.updated_at ? new Date(calendar.updated_at) : null);
+        setOwnerId(calendar?.owner_id ?? null);
+        setIsOwner(!!(calendar?.owner_id && user?.id && calendar.owner_id === user.id));
+      } else {
+        setOwnerId(null);
+        setIsOwner(false);
       }
 
-      // If calendar doesn't exist yet, provision it (only when editable)
-      if (!calendar && !isViewOnly) {
+      // If calendar doesn't exist yet, provision it (only when editable AND authenticated)
+      if (!calendar && !isViewOnly && user?.id) {
         await supabase.from('fiscal_calendars').upsert({
           id: calendarId,
           calendar_title: 'Calendário de Impostos',
           client_name: '',
-          client_cnpj: ''
+          client_cnpj: '',
+          owner_id: user.id
         });
+        setOwnerId(user.id);
+        setIsOwner(true);
       }
     } catch (error) {
       console.error('Error loading calendar data:', error);
@@ -85,23 +97,35 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     } finally {
       setLoading(false);
     }
-  }, [calendarId, isViewOnly]);
+  }, [calendarId, isViewOnly, user?.id]);
 
   // Save calendar data to database and localStorage
   const saveData = useCallback(async (newState: CalendarState) => {
-    if (isViewOnly) return;
+    // If explicitly view-only or no authenticated user, do not attempt DB writes
+    if (isViewOnly || !user?.id) {
+      // Always keep local backup
+      localStorage.setItem(`fiscal-calendar-${calendarId}`, JSON.stringify(newState));
+      if (!user?.id) {
+        toast({
+          title: "Login necessário",
+          description: "Entre para salvar suas alterações na nuvem.",
+        });
+      }
+      return;
+    }
 
     try {
       setSaving(true);
 
-      // Save calendar info with better error handling
+      // Save calendar info with owner_id
       const { error: calendarError } = await supabase
         .from('fiscal_calendars')
         .upsert({
           id: calendarId,
           calendar_title: newState.appInfo.calendarTitle,
           client_name: newState.appInfo.name,
-          client_cnpj: newState.appInfo.cnpj
+          client_cnpj: newState.appInfo.cnpj,
+          owner_id: user.id
         });
 
       if (calendarError) {
@@ -170,7 +194,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     } finally {
       setSaving(false);
     }
-  }, [calendarId, isViewOnly, toast]);
+  }, [calendarId, isViewOnly, toast, user?.id]);
 
   // Load data on mount
   useEffect(() => {
@@ -235,6 +259,8 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     saveData,
     saveDataDebounced,
     saveDataImmediate,
-    loadData
+    loadData,
+    ownerId,
+    isOwner
   };
 }

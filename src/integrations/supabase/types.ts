@@ -21,6 +21,7 @@ export type Database = {
           client_name: string | null
           created_at: string
           id: string
+          owner_id: string | null
           updated_at: string
         }
         Insert: {
@@ -29,6 +30,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id: string
+          owner_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -37,6 +39,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id?: string
+          owner_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -76,6 +79,13 @@ export type Database = {
           value?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fiscal_events_calendar_fk"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "fiscal_calendars"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fiscal_events_calendar_id_fkey"
             columns: ["calendar_id"]

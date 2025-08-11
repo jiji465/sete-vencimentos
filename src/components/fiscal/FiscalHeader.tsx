@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Share2, Download, Plus, FileText } from "lucide-react";
+import { Share2, Download, Plus, FileText, LogIn, LogOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface FiscalHeaderProps {
@@ -15,6 +16,9 @@ interface FiscalHeaderProps {
   onOpenClients?: () => void;
   onTitleBlur?: () => void;
   isViewOnly?: boolean;
+  isAuthenticated?: boolean;
+  onLogin?: () => void;
+  onLogout?: () => void;
 }
 
 export function FiscalHeader({
@@ -27,7 +31,10 @@ export function FiscalHeader({
   onDuplicateCalendar,
   onOpenClients,
   onTitleBlur,
-  isViewOnly = false
+  isViewOnly = false,
+  isAuthenticated = false,
+  onLogin,
+  onLogout
 }: FiscalHeaderProps) {
   return (
     <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
@@ -87,6 +94,15 @@ export function FiscalHeader({
             <Plus className="w-4 h-4 mr-2" />
             Adicionar
           </Button>
+          {isAuthenticated ? (
+            <Button variant="outline" onClick={onLogout} className="transition-spring">
+              <LogOut className="w-4 h-4 mr-2" /> Sair
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={onLogin} className="transition-spring">
+              <LogIn className="w-4 h-4 mr-2" /> Entrar
+            </Button>
+          )}
         </div>
       )}
 
@@ -94,6 +110,11 @@ export function FiscalHeader({
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-secondary/50 px-3 py-2 rounded-md">
           <FileText className="w-4 h-4" />
           Modo Consulta
+          {!isAuthenticated && (
+            <Button variant="outline" size="sm" onClick={onLogin} className="ml-2 h-7 px-2">
+              <LogIn className="w-3 h-3 mr-1" /> Entrar
+            </Button>
+          )}
         </div>
       )}
     </header>

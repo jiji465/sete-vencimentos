@@ -11,6 +11,8 @@ import { FiscalEvent } from '@/types/fiscal';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { generateCalendarId } from '@/lib/fiscal-utils';
+import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 
 interface FiscalCalendarAppProps {
   isViewOnly?: boolean;
@@ -32,6 +34,9 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     persistNow
   } = useFiscalCalendar({ isViewOnly, initialCalendarId: calendarId });
 
+  const { user, isAuthenticated, signOut } = useAuth();
+  const { toast } = useToast();
+
   const navigate = useNavigate();
 
   const [eventModalOpen, setEventModalOpen] = useState(false);
@@ -39,28 +44,51 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
   const [selectedEvent, setSelectedEvent] = useState<FiscalEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
 
+  // Determine effective view-only: explicit or not authenticated
+  const effectiveViewOnly = isViewOnly || !isAuthenticated;
+
   const handleDayClick = (date: string) => {
+    if (effectiveViewOnly) {
+      toast({ title: "Somente leitura", description: "Entre para adicionar ou editar eventos." });
+      return;
+    }
     setSelectedDate(date);
     setSelectedEvent(null);
     setEventModalOpen(true);
   };
 
   const handleEventEdit = (event: FiscalEvent) => {
+    if (effectiveViewOnly) {
+      toast({ title: "Somente leitura", description: "Entre para editar eventos." });
+      return;
+    }
     setSelectedEvent(event);
     setSelectedDate('');
     setEventModalOpen(true);
   };
 
   const handleEventSave = (event: FiscalEvent) => {
+    if (effectiveViewOnly) {
+      toast({ title: "Somente leitura", description: "Entre para salvar alterações." });
+      return;
+    }
     saveEvent(event);
     setEventModalOpen(false);
   };
 
   const handleEventDelete = (eventId: string) => {
+    if (effectiveViewOnly) {
+      toast({ title: "Somente leitura", description: "Entre para excluir eventos." });
+      return;
+    }
     deleteEvent(eventId);
   };
 
   const handleAddEvent = () => {
+    if (effectiveViewOnly) {
+      toast({ title: "Somente leitura", description: "Entre para adicionar eventos." });
+      return;
+    }
     setSelectedEvent(null);
     setSelectedDate(new Date().toISOString().split('T')[0]);
     setEventModalOpen(true);
@@ -75,7 +103,6 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
   };
 
   const handleShare = async () => {
-    // Persist current state before sharing to ensure link loads latest data
     if (persistNow) {
       await persistNow();
     }
@@ -83,12 +110,29 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
   };
 
   const handleNewCalendar = async () => {
+    if (!isAuthenticated) {
+      toast({ title: "Login necessário", description: "Entre para criar um novo calendário." });
+      navigate("/auth");
+      return;
+    }
     if (persistNow) await persistNow();
     const newId = generateCalendarId();
+    await supabase.from('fiscal_calendars').upsert({
+      id: newId,
+      calendar_title: state.appInfo.calendarTitle || 'Calendário de Impostos',
+      client_name: '',
+      client_cnpj: '',
+      owner_id: user?.id || null
+    });
     navigate(`/calendario-fiscal?id=${newId}`);
   };
 
   const handleDuplicateCalendar = async () => {
+    if (!isAuthenticated) {
+      toast({ title: "Login necessário", description: "Entre para duplicar calendários." });
+      navigate("/auth");
+      return;
+    }
     if (persistNow) await persistNow();
     const newId = generateCalendarId();
 
@@ -96,7 +140,8 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
       id: newId,
       calendar_title: state.appInfo.calendarTitle,
       client_name: state.appInfo.name,
-      client_cnpj: state.appInfo.cnpj
+      client_cnpj: state.appInfo.cnpj,
+      owner_id: user?.id || null
     });
 
     if (state.events.length > 0) {
@@ -127,6 +172,7 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [persistNow]);
+
   if (loading) {
     return (
       <div className="min-h-screen gradient-subtle flex items-center justify-center">
@@ -155,25 +201,37 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
 
         <FiscalHeader
           calendarTitle={state.appInfo.calendarTitle}
-          onCalendarTitleChange={(title) => updateAppInfo({ calendarTitle: title })}
+          onCalendarTitleChange={(title) => {
+            if (effectiveViewOnly) return;
+            updateAppInfo({ calendarTitle: title });
+          }}
           onAddEvent={handleAddEvent}
           onExportPdf={handleExportPdf}
           onShare={handleShare}
           onNewCalendar={handleNewCalendar}
           onDuplicateCalendar={handleDuplicateCalendar}
           onOpenClients={handleOpenClients}
-          onTitleBlur={() => persistNow?.()}
-          isViewOnly={isViewOnly}
+          onTitleBlur={() => !effectiveViewOnly && persistNow?.()}
+          isViewOnly={effectiveViewOnly}
+          isAuthenticated={isAuthenticated}
+          onLogin={() => navigate("/auth")}
+          onLogout={() => signOut()}
         />
 
         <div className="space-y-6">
           <ClientInfo
             clientName={state.appInfo.name}
             clientCnpj={state.appInfo.cnpj}
-            onClientNameChange={(name) => updateAppInfo({ name })}
-            onClientCnpjChange={(cnpj) => updateAppInfo({ cnpj })}
-            onFieldBlur={() => persistNow?.()}
-            isViewOnly={isViewOnly}
+            onClientNameChange={(name) => {
+              if (effectiveViewOnly) return;
+              updateAppInfo({ name });
+            }}
+            onClientCnpjChange={(cnpj) => {
+              if (effectiveViewOnly) return;
+              updateAppInfo({ cnpj });
+            }}
+            onFieldBlur={() => !effectiveViewOnly && (persistNow?.())}
+            isViewOnly={effectiveViewOnly}
           />
 
           <CalendarControls
@@ -188,7 +246,7 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
             onDayClick={handleDayClick}
             onEventEdit={handleEventEdit}
             onEventDelete={handleEventDelete}
-            isViewOnly={isViewOnly}
+            isViewOnly={effectiveViewOnly}
           />
 
           <FiscalDashboard
