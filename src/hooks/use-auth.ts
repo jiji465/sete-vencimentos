@@ -45,26 +45,47 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const signIn = useCallback(async (email: string, password: string, captchaToken?: string) => {
+    // Clean up possible stale sessions before attempting to sign in
+    cleanupAuthState();
+    try {
+      await supabase.auth.signOut({ scope: "global" });
+    } catch {
+      // ignore
+    }
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: captchaToken ? { captchaToken } : undefined,
+    });
     if (error) {
       toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
       return { error };
     }
-    // Full refresh to ensure a clean state
     window.location.href = "/clientes";
     return { error: null };
   }, [toast]);
 
-  const signUp = useCallback(async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string, captchaToken?: string) => {
+    // Clean up possible stale sessions before attempting to sign up
+    cleanupAuthState();
+    try {
+      await supabase.auth.signOut({ scope: "global" });
+    } catch {
+      // ignore
+    }
     const redirectUrl = `${window.location.origin}/clientes`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: redirectUrl },
+      options: { emailRedirectTo: redirectUrl, captchaToken },
     });
     if (error) {
-      toast({ title: "Erro ao criar conta", description: error.message, variant: "destructive" });
+      const message =
+        error.message?.includes("users_email_partial_key") || error.message?.toLowerCase().includes("duplicate")
+          ? "Email já cadastrado. Tente entrar ou recupere a sua senha."
+          : error.message;
+      toast({ title: "Erro ao criar conta", description: message, variant: "destructive" });
       return { error };
     }
     toast({
