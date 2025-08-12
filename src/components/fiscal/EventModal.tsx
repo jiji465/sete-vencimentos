@@ -102,6 +102,12 @@ export function EventModal({
               placeholder="Ex: ICMS, ISS, COFINS..."
               required
               className="mt-1"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              autoComplete="off"
+              inputMode="text"
+              translate="no"
             />
           </div>
 
@@ -115,6 +121,12 @@ export function EventModal({
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Informações adicionais..."
               className="mt-1"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              autoComplete="off"
+              inputMode="text"
+              translate="no"
             />
           </div>
 

@@ -60,9 +60,8 @@ export const getMonthYear = (date: Date): string => {
 
 export const generateCalendarId = (): string => {
   const timestamp = Date.now().toString(36);
-  const randomPart = Math.random().toString(36).substr(2, 9);
-  const shortId = Math.random().toString(36).substr(2, 5);
-  return `sete-${timestamp}-${randomPart}-${shortId}`;
+  const randomPart = Math.random().toString(36).slice(2, 8);
+  return `sete-${timestamp}-${randomPart}`;
 };
 
 export const createCustomShareLink = (calendarId: string, clientName?: string): string => {
@@ -71,7 +70,9 @@ export const createCustomShareLink = (calendarId: string, clientName?: string): 
     ? clientName.toLowerCase()
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '-')
-        .substring(0, 30)
+        .substring(0, 16)
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
     : 'calendario';
   return `${baseUrl}/calendario-fiscal?view=${calendarId}&s=${slug}`;
 };
