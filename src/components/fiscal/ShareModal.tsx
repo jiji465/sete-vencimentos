@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Users, Settings } from 'lucide-react';
 import { ClientShareModal } from './ClientShareModal';
@@ -22,6 +22,9 @@ export function ShareModal({ isOpen, onClose, calendarId, clientName }: ShareMod
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Compartilhar Calendário</DialogTitle>
+            <DialogDescription>
+              Escolha como deseja compartilhar este calendário fiscal com seus clientes
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">

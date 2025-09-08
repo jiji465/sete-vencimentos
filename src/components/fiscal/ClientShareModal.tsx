@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,6 +79,9 @@ export function ClientShareModal({ isOpen, onClose, calendarId, defaultClientId 
             <Edit className="h-5 w-5" />
             Compartilhamento por Cliente
           </DialogTitle>
+          <DialogDescription>
+            Gerencie links de compartilhamento seguros para seus clientes acessarem o calendário fiscal
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
