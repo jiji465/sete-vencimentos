@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { DialogDescription } from "@radix-ui/react-dialog";
+import { DialogDescription } from "@/components/ui/dialog";
 import { FiscalEvent } from "@/types/fiscal";
 import { formatCurrencyForInput, parseCurrency } from "@/lib/fiscal-utils";
 import { generateEventId } from "@/types/fiscal";
@@ -88,7 +88,9 @@ export function EventModal({
           <DialogTitle className="text-xl gradient-brand bg-clip-text text-transparent">
             {isEdit ? 'Editar Vencimento' : 'Adicionar Vencimento'}
           </DialogTitle>
-          <DialogDescription className="sr-only">Formulário para criar ou editar vencimentos fiscais.</DialogDescription>
+          <DialogDescription>
+            {isEdit ? 'Edite as informações do vencimento fiscal' : 'Adicione um novo vencimento fiscal ao calendário'}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
