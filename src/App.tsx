@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Clients from "./pages/Clients";
 import Auth from "./pages/Auth";
+import ClientView from "./pages/ClientView";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/calendario-fiscal" element={<Index />} />
           <Route path="/clientes" element={<Clients />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/cliente/:clientSlug" element={<ClientView />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

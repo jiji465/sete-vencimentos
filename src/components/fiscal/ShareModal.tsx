@@ -1,12 +1,9 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DialogDescription } from "@radix-ui/react-dialog";
-import { Copy, Check, ExternalLink, Share2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { createCustomShareLink, createEditLink } from "@/lib/fiscal-utils";
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Users, Settings } from 'lucide-react';
+import { ClientShareModal } from './ClientShareModal';
+import { useToast } from '@/hooks/use-toast';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -16,148 +13,64 @@ interface ShareModalProps {
 }
 
 export function ShareModal({ isOpen, onClose, calendarId, clientName }: ShareModalProps) {
-  const [copiedShare, setCopiedShare] = useState(false);
-  const [copiedEdit, setCopiedEdit] = useState(false);
+  const [showClientModal, setShowClientModal] = useState(false);
   const { toast } = useToast();
 
-  const shareLink = createCustomShareLink(calendarId, clientName);
-  const editLink = createEditLink(calendarId);
-
-  const handleCopyShare = async () => {
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopiedShare(true);
-      toast({
-        title: "Link de partilha copiado!",
-        description: "O link foi copiado para a área de transferência.",
-      });
-      setTimeout(() => setCopiedShare(false), 2000);
-    } catch (err) {
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o link.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleCopyEdit = async () => {
-    try {
-      await navigator.clipboard.writeText(editLink);
-      setCopiedEdit(true);
-      toast({
-        title: "Link de edição copiado!",
-        description: "Guarde este link para poder editar o calendário.",
-      });
-      setTimeout(() => setCopiedEdit(false), 2000);
-    } catch (err) {
-      toast({
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o link.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl gradient-brand bg-clip-text text-transparent flex items-center gap-2">
-            <ExternalLink className="w-5 h-5" />
-            Partilhar Calendário
-          </DialogTitle>
-          <DialogDescription className="sr-only">Gerencie e copie os links de partilha e edição do calendário.</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Compartilhar Calendário</DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          <p className="text-muted-foreground">
-            Gerencie os links do seu calendário fiscal de forma segura e personalizada.
-          </p>
-
-          {/* Link de Partilha para Cliente */}
-          <div className="space-y-2">
-            <Label htmlFor="share-link" className="text-sm font-medium flex items-center gap-2">
-              <Share2 className="w-4 h-4" />
-              Link de Partilha (Cliente)
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="share-link"
-                value={shareLink}
-                readOnly
-                className="bg-muted cursor-pointer font-mono text-xs"
-                onClick={(e) => e.currentTarget.select()}
-              />
-              <Button
-                onClick={handleCopyShare}
-                variant="outline"
-                size="icon"
-                className="transition-spring"
-              >
-                {copiedShare ? (
-                  <Check className="w-4 h-4 text-green-600" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Link personalizado para o cliente visualizar o calendário
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Escolha como deseja compartilhar este calendário fiscal:
             </p>
-          </div>
 
-          {/* Link de Edição para o Criador */}
-          <div className="space-y-2">
-            <Label htmlFor="edit-link" className="text-sm font-medium flex items-center gap-2">
-              <ExternalLink className="w-4 h-4" />
-              Link de Edição (Seu)
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="edit-link"
-                value={editLink}
-                readOnly
-                className="bg-muted cursor-pointer font-mono text-xs"
-                onClick={(e) => e.currentTarget.select()}
-              />
-              <Button
-                onClick={handleCopyEdit}
+            <div className="space-y-3">
+              <Button 
+                onClick={() => setShowClientModal(true)}
+                className="w-full justify-start gap-3 h-auto p-4"
                 variant="outline"
-                size="icon"
-                className="transition-spring"
               >
-                {copiedEdit ? (
-                  <Check className="w-4 h-4 text-green-600" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
+                <Users className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-medium">Compartilhamento Seguro por Cliente</div>
+                  <div className="text-sm text-muted-foreground">
+                    Gere links únicos e seguros para cada cliente
+                  </div>
+                </div>
               </Button>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-medium text-sm mb-2">Recursos do Compartilhamento Seguro:</h4>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  <li>• Links únicos por cliente (CNPJ)</li>
+                  <li>• Controle de acesso (visualização ou edição)</li>
+                  <li>• Data de expiração configurável</li>
+                  <li>• Gerenciamento completo dos acessos</li>
+                  <li>• Segurança avançada com tokens criptografados</li>
+                </ul>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              ⚠️ Guarde este link para poder editar o calendário no futuro
-            </p>
           </div>
 
-          <div className="bg-secondary/30 p-4 rounded-lg border border-accent/20">
-            <h4 className="font-semibold text-sm mb-2 text-accent-foreground">
-              Instruções importantes:
-            </h4>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• <strong>Link de Partilha:</strong> Apenas visualização, seguro para clientes</li>
-              <li>• <strong>Link de Edição:</strong> Permite modificar dados, mantenha privado</li>
-              <li>• Links personalizados nunca expiram</li>
-              <li>• Funcionam em qualquer dispositivo e navegador</li>
-            </ul>
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button onClick={onClose} variant="outline" className="transition-spring">
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={onClose}>
               Fechar
             </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <ClientShareModal
+        isOpen={showClientModal}
+        onClose={() => setShowClientModal(false)}
+        calendarId={calendarId}
+        defaultClientId={clientName}
+      />
+    </>
   );
 }

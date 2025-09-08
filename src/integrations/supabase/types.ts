@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_share_tokens: {
+        Row: {
+          calendar_id: string
+          client_id: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          scope: string
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          calendar_id: string
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          scope?: string
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          scope?: string
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fiscal_calendars: {
         Row: {
           calendar_title: string
@@ -100,7 +136,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      validate_share_token: {
+        Args: { p_calendar_id: string; p_client_id?: string; p_token: string }
+        Returns: {
+          calendar_id: string
+          client_id: string
+          scope: string
+          valid: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

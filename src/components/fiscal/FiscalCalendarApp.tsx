@@ -18,9 +18,11 @@ import { useToast } from '@/hooks/use-toast';
 interface FiscalCalendarAppProps {
   isViewOnly?: boolean;
   calendarId?: string;
+  clientId?: string;
+  shareToken?: string;
 }
 
-export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCalendarAppProps) {
+export function FiscalCalendarApp({ isViewOnly = false, calendarId, clientId, shareToken }: FiscalCalendarAppProps) {
   const {
     currentDate,
     calendarId: currentCalendarId,
