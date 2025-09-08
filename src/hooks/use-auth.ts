@@ -6,14 +6,19 @@ import { useToast } from "@/hooks/use-toast";
 
 const cleanupAuthState = () => {
   try {
-    // Remove common supabase auth keys from localStorage and sessionStorage
+    // Remove all auth and calendar data from localStorage and sessionStorage
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("supabase.auth.") || key.includes("sb-")) {
+      if (key.startsWith("supabase.auth.") || 
+          key.includes("sb-") || 
+          key.startsWith("fiscal-calendar-") ||
+          key === "auth_attempts") {
         localStorage.removeItem(key);
       }
     });
     Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith("supabase.auth.") || key.includes("sb-")) {
+      if (key.startsWith("supabase.auth.") || 
+          key.includes("sb-") ||
+          key.startsWith("fiscal-calendar-")) {
         sessionStorage.removeItem(key);
       }
     });

@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { FiscalEvent } from "@/types/fiscal";
-import { formatCurrencyForInput, parseCurrency, generateCalendarId } from "@/lib/fiscal-utils";
+import { formatCurrencyForInput, parseCurrency } from "@/lib/fiscal-utils";
+import { generateEventId } from "@/types/fiscal";
 import { Trash2 } from "lucide-react";
 
 interface EventModalProps {
@@ -56,7 +57,7 @@ export function EventModal({
     if (!formData.taxName || !formData.date) return;
 
     const eventData: FiscalEvent = {
-      id: event?.id || generateCalendarId(),
+      id: event?.id || generateEventId(),
       taxName: formData.taxName,
       title: formData.title || '',
       date: formData.date,

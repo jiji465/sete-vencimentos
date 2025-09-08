@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Share2, Download, Plus, FileText, LogIn, LogOut } from "lucide-react";
+import { SecurityBadge } from "@/components/common/SecurityBadge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface FiscalHeaderProps {
@@ -42,7 +43,7 @@ export function FiscalHeader({
         <h1 className="text-4xl lg:text-5xl font-bold gradient-brand bg-clip-text text-transparent mb-3">
           Sete Soluções Fiscais
         </h1>
-        <div className="max-w-md">
+        <div className="max-w-md space-y-3">
           <Label htmlFor="calendar-title" className="sr-only">
             Título do Calendário
           </Label>
@@ -55,6 +56,7 @@ export function FiscalHeader({
             disabled={isViewOnly}
             className="text-lg font-medium text-accent bg-transparent border-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
           />
+          <SecurityBadge variant="compact" />
         </div>
       </div>
 

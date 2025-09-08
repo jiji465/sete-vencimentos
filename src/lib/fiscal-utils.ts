@@ -59,9 +59,7 @@ export const getMonthYear = (date: Date): string => {
 };
 
 export const generateCalendarId = (): string => {
-  const timestamp = Date.now().toString(36);
-  const randomPart = Math.random().toString(36).slice(2, 8);
-  return `sete-${timestamp}-${randomPart}`;
+  return crypto.randomUUID();
 };
 
 export const createCustomShareLink = (calendarId: string, clientName?: string): string => {

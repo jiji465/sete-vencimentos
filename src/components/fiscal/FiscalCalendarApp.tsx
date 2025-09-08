@@ -11,6 +11,7 @@ import { FiscalEvent } from '@/types/fiscal';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { generateCalendarId } from '@/lib/fiscal-utils';
+import { generateEventId } from '@/types/fiscal';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -147,7 +148,7 @@ export function FiscalCalendarApp({ isViewOnly = false, calendarId }: FiscalCale
     if (state.events.length > 0) {
       await supabase.from('fiscal_events').upsert(
         state.events.map(e => ({
-          id: generateCalendarId(),
+          id: generateEventId(),
           calendar_id: newId,
           tax_name: e.taxName,
           title: e.title || '',

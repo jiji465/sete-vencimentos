@@ -17,3 +17,7 @@ export interface CalendarState {
   appInfo: AppInfo;
   events: FiscalEvent[];
 }
+
+export const generateEventId = (): string => {
+  return crypto.randomUUID();
+};
