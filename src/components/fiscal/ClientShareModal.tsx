@@ -230,12 +230,18 @@ export function ClientShareModal({ isOpen, onClose, calendarId, defaultClientId 
           <div className="bg-muted/50 p-4 rounded-lg space-y-2">
             <h4 className="font-medium">Como funciona:</h4>
             <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• Cada cliente recebe um link único e seguro</li>
-              <li>• Links de <strong>visualização</strong> permitem apenas ver os impostos</li>
-              <li>• Links de <strong>edição</strong> permitem que o cliente confirme ou edite informações</li>
-              <li>• Você pode definir uma data de expiração para maior segurança</li>
-              <li>• Os links podem ser removidos a qualquer momento</li>
+              <li>• <strong>URLs únicas:</strong> Cada cliente recebe um link único com token seguro criptografado</li>
+              <li>• <strong>Acesso controlado:</strong> Links de <span className="text-foreground font-medium">visualização</span> são somente leitura</li>
+              <li>• <strong>Edição segura:</strong> Links de <span className="text-foreground font-medium">edição</span> permitem ao cliente confirmar e editar impostos</li>
+              <li>• <strong>Expiração:</strong> Configure prazo de validade para maior segurança</li>
+              <li>• <strong>Gerenciamento:</strong> Remova ou crie novos links a qualquer momento</li>
+              <li>• <strong>Auditoria:</strong> Veja quando cada link foi criado e quando expira</li>
             </ul>
+            <div className="mt-3 p-3 bg-primary/10 rounded border-l-4 border-primary">
+              <p className="text-sm text-foreground font-medium">
+                💡 Dica para contabilidades grandes: Use o CNPJ como identificação do cliente para facilitar o gerenciamento
+              </p>
+            </div>
           </div>
         </div>
 

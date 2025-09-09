@@ -122,7 +122,7 @@ export function useShareTokens(calendarId: string) {
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
     
-    return `${baseUrl}/cliente/${slug}?calendar=${calendarId}&token=${token}`;
+    return `${baseUrl}/cliente/${slug}?calendar=${calendarId}&token=${token}&client=${encodeURIComponent(clientId)}`;
   };
 
   useEffect(() => {

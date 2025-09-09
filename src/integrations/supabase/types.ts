@@ -136,6 +136,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      client_save_calendar_data: {
+        Args: {
+          p_calendar_id: string
+          p_client_cnpj: string
+          p_client_name: string
+          p_events: Json
+          p_token: string
+        }
+        Returns: Json
+      }
       validate_share_token: {
         Args: { p_calendar_id: string; p_client_id?: string; p_token: string }
         Returns: {

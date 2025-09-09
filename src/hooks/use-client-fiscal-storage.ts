@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarState } from '@/types/fiscal';
 import { useToast } from '@/hooks/use-toast';
+import { createClient } from '@supabase/supabase-js';
 
 interface UseClientFiscalStorageProps {
   calendarId: string;
@@ -22,9 +23,25 @@ export function useClientFiscalStorage({ calendarId, token, clientId }: UseClien
   const [tokenScope, setTokenScope] = useState<'view' | 'edit'>('view');
   const { toast } = useToast();
 
+  // Create a client with the token header for RLS
+  const clientWithToken = useMemo(() => {
+    return createClient(
+      'https://ooklajermcompfanffwl.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9va2xhamVybWNvbXBmYW5mZndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NjE2OTEsImV4cCI6MjA3MDEzNzY5MX0.wpxbK33ikYQ0EWgUp-A0ee30GPQIgGKOp5LyTSvKMlI',
+      {
+        global: {
+          headers: {
+            'x-share-token': token
+          }
+        }
+      }
+    );
+  }, [token]);
+
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Client Storage: Loading data for calendar:', calendarId, 'with token:', token?.slice(0, 10) + '...');
 
       // Validate token first
       const { data: validation } = await supabase.rpc('validate_share_token', {
@@ -33,27 +50,34 @@ export function useClientFiscalStorage({ calendarId, token, clientId }: UseClien
         p_client_id: clientId || null,
       });
 
+      console.log('🔐 Token validation result:', validation);
+
       if (!validation || validation.length === 0 || !validation[0].valid) {
         throw new Error('Token inválido ou expirado');
       }
 
       const tokenData = validation[0];
       setTokenScope(tokenData.scope as 'view' | 'edit');
+      console.log('✅ Token validated, scope:', tokenData.scope);
 
-      // Load calendar data
-      const { data: calendar, error: calendarError } = await supabase
+      // Load calendar data with token header
+      const { data: calendar, error: calendarError } = await clientWithToken
         .from('fiscal_calendars')
         .select('*')
         .eq('id', calendarId)
         .single();
 
+      console.log('📅 Calendar data:', calendar, 'Error:', calendarError);
+
       if (calendarError) throw calendarError;
 
-      // Load events
-      const { data: events, error: eventsError } = await supabase
+      // Load events with token header
+      const { data: events, error: eventsError } = await clientWithToken
         .from('fiscal_events')
         .select('*')
         .eq('calendar_id', calendarId);
+
+      console.log('📝 Events data:', events?.length, 'events loaded. Error:', eventsError);
 
       if (eventsError) throw eventsError;
 
@@ -97,54 +121,26 @@ export function useClientFiscalStorage({ calendarId, token, clientId }: UseClien
     }
 
     try {
-      // Validate token again before saving
-      const { data: validation } = await supabase.rpc('validate_share_token', {
+      console.log('💾 Saving client data for calendar:', calendarId);
+      console.log('📊 New state events count:', newState.events.length);
+      
+      // Use the secure client save function
+      const { data, error } = await supabase.rpc('client_save_calendar_data', {
         p_token: token,
         p_calendar_id: calendarId,
-        p_client_id: clientId || null,
+        p_client_name: newState.appInfo.name,
+        p_client_cnpj: newState.appInfo.cnpj,
+        p_events: JSON.stringify(newState.events)
       });
 
-      if (!validation || validation.length === 0 || !validation[0].valid) {
-        throw new Error('Token expirou. Solicite um novo link de acesso.');
-      }
+      console.log('💾 Save function result:', data, 'Error:', error);
 
-      // Update calendar info (only client data, not title)
-      await supabase
-        .from('fiscal_calendars')
-        .update({
-          client_name: newState.appInfo.name,
-          client_cnpj: newState.appInfo.cnpj,
-        })
-        .eq('id', calendarId);
+      if (error) throw error;
 
-      // Update events
-      const existingEventIds = state.events.map(e => e.id);
-      const newEventIds = newState.events.map(e => e.id);
+      const result = data as { success: boolean; error?: string };
 
-      // Delete removed events
-      const eventsToDelete = existingEventIds.filter(id => !newEventIds.includes(id));
-      if (eventsToDelete.length > 0) {
-        await supabase
-          .from('fiscal_events')
-          .delete()
-          .in('id', eventsToDelete);
-      }
-
-      // Upsert current events
-      if (newState.events.length > 0) {
-        await supabase
-          .from('fiscal_events')
-          .upsert(
-            newState.events.map(event => ({
-              id: event.id,
-              calendar_id: calendarId,
-              tax_name: event.taxName,
-              title: event.title || '',
-              date: event.date,
-              value: event.value,
-              type: event.type,
-            }))
-          );
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao salvar dados');
       }
 
       setState(newState);

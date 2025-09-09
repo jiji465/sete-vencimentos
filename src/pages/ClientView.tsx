@@ -19,6 +19,7 @@ export default function ClientView() {
   const [searchParams] = useSearchParams();
   const calendarId = searchParams.get('calendar');
   const token = searchParams.get('token');
+  const clientParam = searchParams.get('client');
   
   const [tokenValidation, setTokenValidation] = useState<TokenValidation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ export default function ClientView() {
   const clientStorage = calendarId && token ? useClientFiscalStorage({
     calendarId,
     token,
-    clientId: clientSlug
+    clientId: clientParam || clientSlug
   }) : null;
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function ClientView() {
         const { data, error } = await supabase.rpc('validate_share_token', {
           p_token: token,
           p_calendar_id: calendarId,
+          p_client_id: clientParam || clientSlug || null,
         });
 
         if (error) throw error;
@@ -109,7 +111,7 @@ export default function ClientView() {
               <Calendar className="h-6 w-6 text-primary" />
               <div>
                 <h1 className="text-xl font-semibold text-foreground">
-                  Calendário Fiscal - {tokenValidation.client_id}
+                  Calendário Fiscal - {clientParam || tokenValidation.client_id || clientSlug}
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   Acesso: {isViewOnly ? 'Somente Visualização' : 'Visualização e Edição'}
@@ -133,7 +135,7 @@ export default function ClientView() {
             loading={clientStorage.loading}
             tokenScope={clientStorage.tokenScope}
             onSave={clientStorage.saveData}
-            clientId={tokenValidation.client_id}
+            clientId={clientParam || tokenValidation.client_id || clientSlug}
           />
         ) : (
           <FiscalCalendarApp 

@@ -5,6 +5,8 @@ import { Users, Settings } from 'lucide-react';
 import { ClientShareModal } from './ClientShareModal';
 import { useToast } from '@/hooks/use-toast';
 
+import { ShareGuide } from './ShareGuide';
+
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,37 +30,25 @@ export function ShareModal({ isOpen, onClose, calendarId, clientName }: ShareMod
           </DialogHeader>
 
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Escolha como deseja compartilhar este calendário fiscal:
-            </p>
-
-            <div className="space-y-3">
-              <Button 
-                onClick={() => setShowClientModal(true)}
-                className="w-full justify-start gap-3 h-auto p-4"
-                variant="outline"
-              >
-                <Users className="h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Compartilhamento Seguro por Cliente</div>
-                  <div className="text-sm text-muted-foreground">
-                    Gere links únicos e seguros para cada cliente
-                  </div>
-                </div>
-              </Button>
-
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-medium text-sm mb-2">Recursos do Compartilhamento Seguro:</h4>
-                <ul className="text-xs text-muted-foreground space-y-1">
-                  <li>• Links únicos por cliente (CNPJ)</li>
-                  <li>• Controle de acesso (visualização ou edição)</li>
-                  <li>• Data de expiração configurável</li>
-                  <li>• Gerenciamento completo dos acessos</li>
-                  <li>• Segurança avançada com tokens criptografados</li>
-                </ul>
+            <Button
+              onClick={() => setShowClientModal(true)}
+              className="w-full justify-start gap-3 h-auto p-4"
+              variant="outline"
+            >
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                <Users className="h-5 w-5 text-primary" />
               </div>
-            </div>
+              <div className="flex-1 text-left">
+                <div className="font-medium">Compartilhamento Seguro por Cliente</div>
+                <div className="text-sm text-muted-foreground">
+                  Gere links únicos e seguros para cada cliente acessar seus impostos
+                </div>
+              </div>
+              <Settings className="h-4 w-4 opacity-50" />
+            </Button>
           </div>
+
+          <ShareGuide />
 
           <div className="flex justify-end">
             <Button variant="outline" onClick={onClose}>
