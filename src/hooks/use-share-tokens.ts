@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,7 +17,7 @@ export function useShareTokens(calendarId: string) {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const loadTokens = async () => {
+  const loadTokens = useCallback(async () => {
     if (!calendarId) return;
     
     setLoading(true);
@@ -40,9 +40,21 @@ export function useShareTokens(calendarId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [calendarId, toast]);
 
   const createToken = async (clientId: string, scope: 'view' | 'edit' = 'view', expiresInDays?: number) => {
+    if (!crypto.subtle) {
+      const errorMessage = "A criação de links de compartilhamento seguros requer um ambiente seguro (HTTPS).";
+      console.error(errorMessage);
+      toast({
+        title: "Erro de Segurança",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      // We throw an error to be caught by the calling component's try-catch block
+      throw new Error(errorMessage);
+    }
+
     try {
       // Generate secure token
       const token = crypto.randomUUID() + '-' + crypto.randomUUID();
@@ -70,14 +82,18 @@ export function useShareTokens(calendarId: string) {
       if (error) throw error;
 
       const tokenWithKey = { ...data, token } as ShareToken;
-      setTokens(prev => [tokenWithKey, ...prev]);
+
+      // For security, don't store the raw token in the component state.
+      // The raw token is only returned once to the caller for immediate display.
+      const { token: rawToken, ...tokenForState } = tokenWithKey;
+      setTokens(prev => [tokenForState, ...prev]);
       
       toast({
         title: "Token criado",
         description: `Token de ${scope === 'view' ? 'visualização' : 'edição'} criado para ${clientId}`,
       });
 
-      return tokenWithKey;
+      return tokenWithKey; // Return the object with the raw token
     } catch (error) {
       console.error('Error creating share token:', error);
       toast({
@@ -114,7 +130,10 @@ export function useShareTokens(calendarId: string) {
   };
 
   const generateShareUrl = (token: string, clientId: string) => {
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    // Use environment variable for the base URL if available, otherwise fallback to window.location.origin
+    // This makes URL generation reliable across different environments (local, staging, prod)
+    const baseUrl = import.meta.env.VITE_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+
     const slug = clientId.toLowerCase()
       .replace(/[^\w\s-]/g, '')
       .replace(/\s+/g, '-')
@@ -127,7 +146,7 @@ export function useShareTokens(calendarId: string) {
 
   useEffect(() => {
     loadTokens();
-  }, [calendarId]);
+  }, [loadTokens]);
 
   return {
     tokens,
