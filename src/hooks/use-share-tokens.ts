@@ -19,9 +19,15 @@ export function useShareTokens(calendarId: string) {
 
   const loadTokens = useCallback(async () => {
     if (!calendarId) return;
-    
     setLoading(true);
     try {
+      // Require authentication to manage tokens
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setTokens([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('calendar_share_tokens')
         .select('*')
@@ -34,7 +40,7 @@ export function useShareTokens(calendarId: string) {
       console.error('Error loading share tokens:', error);
       toast({
         title: "Erro",
-        description: "Erro ao carregar tokens de compartilhamento",
+        description: "Erro ao carregar tokens de compartilhamento (verifique se está logado)",
         variant: "destructive",
       });
     } finally {
@@ -51,11 +57,18 @@ export function useShareTokens(calendarId: string) {
         description: errorMessage,
         variant: "destructive",
       });
-      // We throw an error to be caught by the calling component's try-catch block
       throw new Error(errorMessage);
     }
 
     try {
+      // Require authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        const msg = "Você precisa estar logado e ser o proprietário do calendário para criar links.";
+        toast({ title: "Login necessário", description: msg, variant: "destructive" });
+        throw new Error(msg);
+      }
+
       // Generate secure token
       const token = crypto.randomUUID() + '-' + crypto.randomUUID();
       const tokenHash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
@@ -84,7 +97,6 @@ export function useShareTokens(calendarId: string) {
       const tokenWithKey = { ...data, token } as ShareToken;
 
       // For security, don't store the raw token in the component state.
-      // The raw token is only returned once to the caller for immediate display.
       const { token: rawToken, ...tokenForState } = tokenWithKey;
       setTokens(prev => [tokenForState, ...prev]);
       
@@ -94,13 +106,12 @@ export function useShareTokens(calendarId: string) {
       });
 
       return tokenWithKey; // Return the object with the raw token
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating share token:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao criar token de compartilhamento",
-        variant: "destructive",
-      });
+      const message = typeof error?.message === 'string' && /row level security|permission|not authorized|jwt/i.test(error.message)
+        ? 'Permissão negada. Entre com sua conta e verifique se você é o proprietário do calendário.'
+        : 'Erro ao criar token de compartilhamento';
+      toast({ title: "Erro", description: message, variant: "destructive" });
       throw error;
     }
   };
