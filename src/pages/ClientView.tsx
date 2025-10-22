@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useClientFiscalStorage } from '@/hooks/use-client-fiscal-storage';
 import { ClientFiscalCalendar } from '@/components/fiscal/ClientFiscalCalendar';
 import { FiscalCalendarApp } from '@/components/fiscal/FiscalCalendarApp';
 import { Card, CardContent } from '@/components/ui/card';
+import { ClientViewContent } from './ClientViewContent';
 import { Shield, Calendar, AlertTriangle } from 'lucide-react';
 
 interface TokenValidation {
@@ -24,13 +24,6 @@ export default function ClientView() {
   const [tokenValidation, setTokenValidation] = useState<TokenValidation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Use the client fiscal storage hook when we have valid params
-  const clientStorage = calendarId && token ? useClientFiscalStorage({
-    calendarId,
-    token,
-    clientId: clientParam || clientSlug
-  }) : null;
 
   useEffect(() => {
     const validateToken = async () => {
@@ -129,16 +122,14 @@ export default function ClientView() {
 
       {/* Calendar Content */}
       <div className="container mx-auto px-4 py-6">
-        {clientStorage ? (
-          <ClientFiscalCalendar
-            state={clientStorage.state}
-            loading={clientStorage.loading}
-            tokenScope={clientStorage.tokenScope}
-            onSave={clientStorage.saveData}
-            clientId={clientParam || tokenValidation.client_id || clientSlug}
+        {calendarId && token ? (
+          <ClientViewContent
+            calendarId={calendarId}
+            token={token}
+            clientId={clientParam || clientSlug}
           />
         ) : (
-          <FiscalCalendarApp 
+          <FiscalCalendarApp
             calendarId={calendarId}
             isViewOnly={isViewOnly}
           />
