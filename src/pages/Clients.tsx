@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { generateCalendarId, createCustomShareLink } from "@/lib/fiscal-utils";
+import { generateEventId } from "@/types/fiscal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -112,7 +113,7 @@ const Clients = () => {
     if (events && events.length > 0) {
       const { error: evUpErr } = await supabase.from("fiscal_events").upsert(
         events.map((e) => ({
-          id: generateCalendarId(),
+          id: generateEventId(),
           calendar_id: newId,
           tax_name: e.tax_name,
           title: e.title || "",

@@ -22,7 +22,7 @@ export function useFiscalStorage({ calendarId, isViewOnly = false }: UseFiscalSt
     events: []
   });
   const { toast } = useToast();
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<number>();
   const { user } = useAuth();
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState<boolean>(false);

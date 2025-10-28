@@ -3,7 +3,7 @@ declare module "react-hcaptcha" {
   export interface HCaptchaProps {
     sitekey: string;
     onVerify?: (token: string) => void;
-    onError?: (err: any) => void;
+    onError?: (err: unknown) => void;
     onExpire?: () => void;
     size?: "normal" | "compact" | "invisible";
     theme?: "light" | "dark";

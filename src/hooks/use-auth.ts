@@ -52,7 +52,6 @@ export function useAuth() {
 
   const signIn = useCallback(async (email: string, password: string, captchaToken?: string) => {
     // Clean up possible stale sessions before attempting to sign in
-    cleanupAuthState();
     try {
       await supabase.auth.signOut({ scope: "global" });
     } catch {
@@ -73,7 +72,6 @@ export function useAuth() {
 
   const signUp = useCallback(async (email: string, password: string, captchaToken?: string) => {
     // Clean up possible stale sessions before attempting to sign up
-    cleanupAuthState();
     try {
       await supabase.auth.signOut({ scope: "global" });
     } catch {

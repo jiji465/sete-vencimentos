@@ -106,9 +106,9 @@ export function useShareTokens(calendarId: string) {
       });
 
       return tokenWithKey; // Return the object with the raw token
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating share token:', error);
-      const message = typeof error?.message === 'string' && /row level security|permission|not authorized|jwt/i.test(error.message)
+      const message = error instanceof Error && /row level security|permission|not authorized|jwt/i.test(error.message)
         ? 'Permissão negada. Entre com sua conta e verifique se você é o proprietário do calendário.'
         : 'Erro ao criar token de compartilhamento';
       toast({ title: "Erro", description: message, variant: "destructive" });
