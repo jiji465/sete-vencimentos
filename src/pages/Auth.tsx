@@ -5,21 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ALLOW_SIGNUP, EMAIL_DOMAIN_ALLOWLIST, HCAPTCHA_SITE_KEY, RATE_LIMIT_MAX_ATTEMPTS, RATE_LIMIT_WINDOW_MS } from "@/config/security";
 
 const Auth = () => {
-  const { signIn, signUp, authLoading } = useAuth();
-  const { toast } = useToast();
-  const [mode, setMode] = useState<"login" | "signup">(ALLOW_SIGNUP ? "login" : "login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
-  const [attempts, setAttempts] = useState<number>(0);
-  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+  const { signIn, signUp, authLoading, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate("/clientes");
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   useEffect(() => {
     if (!ALLOW_SIGNUP && mode === "signup") setMode("login");
@@ -164,8 +164,8 @@ const Auth = () => {
                 {isBlocked
                   ? `Aguarde ${secondsLeft}s`
                   : mode === "login"
-                  ? "Entrar"
-                  : "Criar conta"}
+                    ? "Entrar"
+                    : "Criar conta"}
               </Button>
 
               <div className="text-xs text-center text-muted-foreground">
