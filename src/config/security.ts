@@ -1,7 +1,7 @@
 // Centralize security-related toggles and settings
 // Adjust these values according to your needs.
 
-export const ALLOW_SIGNUP = false; // Set to true to allow self-service signups
+export const ALLOW_SIGNUP = true; // Set to true to allow self-service signups
 
 // Optional: restrict signups to these email domains (lowercase). Example: ["empresa.com"]
 export const EMAIL_DOMAIN_ALLOWLIST: string[] = [];
