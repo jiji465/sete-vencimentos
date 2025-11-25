@@ -14,6 +14,13 @@ import { ALLOW_SIGNUP, EMAIL_DOMAIN_ALLOWLIST, HCAPTCHA_SITE_KEY, RATE_LIMIT_MAX
 const Auth = () => {
   const { signIn, signUp, authLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [mode, setMode] = useState<"login" | "signup">(ALLOW_SIGNUP ? "login" : "login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
+  const [attempts, setAttempts] = useState<number>(0);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {

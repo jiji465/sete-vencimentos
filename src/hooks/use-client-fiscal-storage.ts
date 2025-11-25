@@ -26,8 +26,8 @@ export function useClientFiscalStorage({ calendarId, token, clientId }: UseClien
   // Create a client with the token header for RLS
   const clientWithToken = useMemo(() => {
     return createClient(
-      'https://ihwmsjfnpirlfcuptima.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlod21zamZucGlybGZjdXB0aW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzM3MTEsImV4cCI6MjA3NjA0OTcxMX0.ypLuY922CoMxsoTMpZb8BEYRU9jusHVrDYpp_aMx3R4',
+      import.meta.env.VITE_SUPABASE_URL || 'https://ihwmsjfnpirlfcuptima.supabase.co',
+      import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlod21zamZucGlybGZjdXB0aW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzM3MTEsImV4cCI6MjA3NjA0OTcxMX0.ypLuY922CoMxsoTMpZb8BEYRU9jusHVrDYpp_aMx3R4',
       {
         global: {
           headers: {
