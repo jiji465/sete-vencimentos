@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { generateCalendarId, createCustomShareLink } from "@/lib/fiscal-utils";
+import { generateCalendarId } from "@/lib/fiscal-utils";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { ClientShareModal } from "@/components/fiscal/ClientShareModal";
 
 interface CalendarRow {
   id: string;
@@ -23,6 +24,11 @@ const Clients = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  
+  // State for share modal
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
+  const [selectedClientName, setSelectedClientName] = useState<string | undefined>(undefined);
 
   const load = useCallback(async () => {
     if (!isAuthenticated || !user?.id) {
@@ -149,10 +155,10 @@ const Clients = () => {
     load();
   };
 
-  const handleCopyShare = async (id: string, name?: string | null) => {
-    const link = createCustomShareLink(id, name || undefined);
-    await navigator.clipboard.writeText(link);
-    toast({ title: "Link copiado", description: "Link de visualização copiado para a área de transferência" });
+  const handleOpenShare = (id: string, name?: string | null) => {
+    setSelectedCalendarId(id);
+    setSelectedClientName(name || undefined);
+    setShareModalOpen(true);
   };
 
   if (!isAuthenticated) {
@@ -204,7 +210,7 @@ const Clients = () => {
                   <div className="text-sm text-muted-foreground">{c.calendar_title}</div>
                   <div className="flex flex-wrap gap-2 pt-2">
                     <Button variant="outline" onClick={() => handleOpen(c.id)}>Abrir</Button>
-                    <Button variant="secondary" onClick={() => handleCopyShare(c.id, c.client_name)}>Copiar link</Button>
+                    <Button variant="secondary" onClick={() => handleOpenShare(c.id, c.client_name)}>Compartilhar</Button>
                     <Button variant="outline" onClick={() => handleDuplicate(c.id)}>Duplicar</Button>
                     <Button variant="destructive" onClick={() => handleDelete(c.id)}>Excluir</Button>
                   </div>
@@ -212,6 +218,15 @@ const Clients = () => {
               </Card>
             ))}
           </div>
+        )}
+
+        {selectedCalendarId && (
+          <ClientShareModal
+            isOpen={shareModalOpen}
+            onClose={() => setShareModalOpen(false)}
+            calendarId={selectedCalendarId}
+            defaultClientId={selectedClientName}
+          />
         )}
       </main>
     </div>
