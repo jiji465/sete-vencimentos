@@ -26,8 +26,8 @@ export function useClientFiscalStorage({ calendarId, token, clientId }: UseClien
   // Create a client with the token header for RLS
   const clientWithToken = useMemo(() => {
     return createClient(
-      'https://ooklajermcompfanffwl.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9va2xhamVybWNvbXBmYW5mZndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1NjE2OTEsImV4cCI6MjA3MDEzNzY5MX0.wpxbK33ikYQ0EWgUp-A0ee30GPQIgGKOp5LyTSvKMlI',
+      'https://ihwmsjfnpirlfcuptima.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlod21zamZucGlybGZjdXB0aW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA0NzM3MTEsImV4cCI6MjA3NjA0OTcxMX0.ypLuY922CoMxsoTMpZb8BEYRU9jusHVrDYpp_aMx3R4',
       {
         global: {
           headers: {
@@ -123,7 +123,7 @@ export function useClientFiscalStorage({ calendarId, token, clientId }: UseClien
     try {
       console.log('💾 Saving client data for calendar:', calendarId);
       console.log('📊 New state events count:', newState.events.length);
-      
+
       // Use the secure client save function
       const { data, error } = await supabase.rpc('client_save_calendar_data', {
         p_token: token,
